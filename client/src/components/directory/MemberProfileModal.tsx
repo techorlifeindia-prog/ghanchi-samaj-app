@@ -128,7 +128,7 @@ export const MemberProfileModal: React.FC<MemberProfileModalProps> = ({
 
             <div className="ios-field-group">
               <label className="ios-field-label">{language === 'hi' ? 'पिता / संरक्षक का नाम' : 'Father / Guardian Name'}</label>
-              <input type="text" autoCapitalize="words" value={guardianName} onChange={(e) => setGuardianName(capitalizeWords(e.target.value))} placeholder={language === 'hi' ? 'उदा: स्व. बाबूलालजी...' : 'e.g. Late Babulalji...'} className="ios-field-input" />
+              <input type="text" autoCapitalize="words" value={guardianName} onChange={(e) => setGuardianName(capitalizeWords(e.target.value))} placeholder={language === 'hi' ? 'उदा: श्री मोहनलालजी...' : 'e.g. Shri Mohanlalji...'} className="ios-field-input" />
             </div>
           </div>
 

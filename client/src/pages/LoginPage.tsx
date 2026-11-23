@@ -56,8 +56,8 @@ export const LoginPage: React.FC = () => {
 
   // [GSA-ATH-F-PG-02: 1-Click Instant Demo Login (For Fast Testing)]
   const handleQuickMemberDemo = () => {
-    localStorage.setItem('gsa_active_tab', 'profile');
-    window.location.hash = 'profile';
+    localStorage.setItem('gsa_active_tab', 'home');
+    window.location.hash = 'home';
     loginUser({
       id: 'usr_demo_101',
       name: 'राजेश घाँची (Rajesh Ghanchi)',
@@ -100,8 +100,8 @@ export const LoginPage: React.FC = () => {
     if (e) e.preventDefault();
     const code = emailOtp.join('');
     if (code === '123456' || code.length === 6) {
-      localStorage.setItem('gsa_active_tab', 'profile');
-      window.location.hash = 'profile';
+      localStorage.setItem('gsa_active_tab', 'home');
+      window.location.hash = 'home';
       loginUser({
         id: 'usr_' + Date.now(),
         name: email.split('@')[0].toUpperCase(),
@@ -141,8 +141,8 @@ export const LoginPage: React.FC = () => {
     if (e) e.preventDefault();
     const code = mobileOtp.join('');
     if (code === '123456' || code.length === 6) {
-      localStorage.setItem('gsa_active_tab', 'profile');
-      window.location.hash = 'profile';
+      localStorage.setItem('gsa_active_tab', 'home');
+      window.location.hash = 'home';
       loginUser({
         id: 'usr_' + Date.now(),
         name: 'समाज बंधु (Member)',
@@ -162,6 +162,8 @@ export const LoginPage: React.FC = () => {
     if (e) e.preventDefault();
     const pin = overridePin || adminPin;
     if (pin === '7860' || pin === '9999' || pin === 'admin') {
+      localStorage.setItem('gsa_active_tab', 'admin');
+      window.location.hash = 'admin';
       loginAdmin();
       showToast(language === 'hi' ? '🛡️ व्यवस्थापक (Admin) लॉगिन सफल!' : '🛡️ Admin logged in successfully!', 'success');
     } else {
