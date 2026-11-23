@@ -1,0 +1,44 @@
+name: Safe CI/CD Auto-Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🔍 TypeScript Quality Check
+        run: npm run check
+
+      - name: 🏗️ Production Build Verification
+        run: npm run build
+
+      - name: 🚀 Remote Deploy to VPS (if VPS_SSH_KEY configured)
+        if: env.HAS_SSH == 'true'
+        env:
+          HAS_SSH: ${{ secrets.VPS_SSH_KEY != '' }}
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST || '45.195.159.217' }}
+          username: ${{ secrets.VPS_USER || 'root' }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            if [ ! -d "/var/www/ghanchi-samaj-app" ]; then
+              mkdir -p /var/www && cd /var/www && git clone https://github.com/techorlifeindia-prog/ghanchi-samaj-app.git;
+            fi
+            cd /var/www/ghanchi-samaj-app && chmod +x scripts/deploy.sh && bash scripts/deploy.sh
