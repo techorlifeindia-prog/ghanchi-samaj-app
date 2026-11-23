@@ -93,7 +93,7 @@ export const LoginPage: React.FC = () => {
     setIsEmailLoading(false);
     setEmailOtpSent(true);
     setEmailTimer(30);
-    showToast(language === 'hi' ? '✨ ईमेल पर OTP भेज दिया गया है! (Demo: 123456)' : '✨ Email OTP sent! (Demo: 123456)', 'success');
+    showToast(language === 'hi' ? '✨ ईमेल पर OTP भेज दिया गया है!' : '✨ OTP sent to your email!', 'success');
   };
 
   const handleVerifyEmailOtp = (e?: React.FormEvent) => {
@@ -112,7 +112,7 @@ export const LoginPage: React.FC = () => {
       });
       showToast(language === 'hi' ? '🎉 ईमेल लॉगिन सफल!' : '🎉 Email login successful!', 'success');
     } else {
-      showToast(language === 'hi' ? 'गलत OTP! डेमो OTP: 123456' : 'Invalid OTP! Use demo: 123456', 'error');
+      showToast(language === 'hi' ? 'गलत OTP! कृपया सही OTP दर्ज करें' : 'Invalid OTP! Please enter the correct code', 'error');
     }
   };
 
@@ -134,7 +134,7 @@ export const LoginPage: React.FC = () => {
     setIsMobileLoading(false);
     setMobileOtpSent(true);
     setMobileTimer(30);
-    showToast(language === 'hi' ? '✨ WhatsApp पर OTP भेज दिया गया है! (Demo: 123456)' : '✨ WhatsApp OTP sent! (Demo: 123456)', 'success');
+    showToast(language === 'hi' ? '✨ WhatsApp पर OTP भेज दिया गया है!' : '✨ OTP sent on WhatsApp!', 'success');
   };
 
   const handleVerifyMobileOtp = (e?: React.FormEvent) => {
@@ -153,7 +153,7 @@ export const LoginPage: React.FC = () => {
       });
       showToast(language === 'hi' ? '🎉 WhatsApp OTP सत्यापित! लॉगिन सफल।' : '🎉 WhatsApp OTP verified! Login successful.', 'success');
     } else {
-      showToast(language === 'hi' ? 'गलत OTP! डेमो OTP: 123456' : 'Invalid OTP! Use demo: 123456', 'error');
+      showToast(language === 'hi' ? 'गलत OTP! कृपया सही OTP दर्ज करें' : 'Invalid OTP! Please enter the correct code', 'error');
     }
   };
 
@@ -165,7 +165,7 @@ export const LoginPage: React.FC = () => {
       loginAdmin();
       showToast(language === 'hi' ? '🛡️ व्यवस्थापक (Admin) लॉगिन सफल!' : '🛡️ Admin logged in successfully!', 'success');
     } else {
-      showToast(language === 'hi' ? 'गलत एडमिन पिन! (डेमो पिन: 7860)' : 'Incorrect Admin PIN! (Demo PIN: 7860)', 'error');
+      showToast(language === 'hi' ? 'गलत एडमिन पिन! कृपया सही पिन दर्ज करें' : 'Incorrect Admin PIN! Please try again', 'error');
     }
   };
 
@@ -254,30 +254,6 @@ export const LoginPage: React.FC = () => {
             <span className="text-xs sm:text-sm font-extrabold tracking-wide">
               {t('mockupCardBanner')}
             </span>
-          </div>
-
-          {/* 1-Click Quick Demo Bar for Rapid Evaluation */}
-          <div className="bg-amber-50/70 border border-amber-200/70 rounded-2xl p-2 flex items-center justify-between gap-1">
-            <span className="text-[10.5px] font-bold text-amber-900 flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <span>{language === 'hi' ? 'त्वरित टेस्ट:' : 'Quick Test:'}</span>
-            </span>
-            <div className="flex gap-1.5">
-              <button
-                type="button"
-                onClick={handleQuickMemberDemo}
-                className="text-[10.5px] font-black bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-lg shadow-xs transition-all active:scale-95"
-              >
-                सदस्य Demo
-              </button>
-              <button
-                type="button"
-                onClick={handleQuickAdminDemo}
-                className="text-[10.5px] font-black bg-white hover:bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded-lg shadow-xs transition-all active:scale-95"
-              >
-                Admin Demo
-              </button>
-            </div>
           </div>
 
           {/* Mockup 3-Pill Tab Switcher: [Email OTP] [WhatsApp] | [Admin] */}
@@ -374,18 +350,9 @@ export const LoginPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <div className="flex justify-between items-center mb-1.5">
-                      <label className="text-xs font-bold text-slate-700">
-                        {language === 'hi' ? '6-अंकों का OTP कोड' : 'Enter 6-Digit OTP'}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setEmailOtp(['1', '2', '3', '4', '5', '6'])}
-                        className="text-[10.5px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200"
-                      >
-                        ⚡ ऑटो-फ़िल: 123456
-                      </button>
-                    </div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {language === 'hi' ? '6-अंकों का OTP कोड दर्ज करें' : 'Enter 6-Digit OTP Code'}
+                    </label>
 
                     <div className="grid grid-cols-6 gap-1.5">
                       {emailOtp.map((digit, idx) => (
@@ -417,7 +384,7 @@ export const LoginPage: React.FC = () => {
                         <span>{language === 'hi' ? 'पुनः OTP भेजें' : 'Resend OTP'}</span>
                       </button>
                     )}
-                    <span className="text-[10.5px] text-slate-400">Demo: 123456</span>
+                    <span className="text-[10.5px] text-slate-400">🔒 256-Bit SSL</span>
                   </div>
 
                   <button
@@ -483,18 +450,9 @@ export const LoginPage: React.FC = () => {
                   </div>
 
                   <div>
-                    <div className="flex justify-between items-center mb-1.5">
-                      <label className="text-xs font-bold text-slate-700">
-                        {language === 'hi' ? '6-अंकों का WhatsApp OTP' : 'Enter 6-Digit OTP'}
-                      </label>
-                      <button
-                        type="button"
-                        onClick={() => setMobileOtp(['1', '2', '3', '4', '5', '6'])}
-                        className="text-[10.5px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200"
-                      >
-                        ⚡ ऑटो-फ़िल: 123456
-                      </button>
-                    </div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      {language === 'hi' ? '6-अंकों का WhatsApp OTP दर्ज करें' : 'Enter 6-Digit WhatsApp OTP'}
+                    </label>
 
                     <div className="grid grid-cols-6 gap-1.5">
                       {mobileOtp.map((digit, idx) => (
@@ -526,7 +484,7 @@ export const LoginPage: React.FC = () => {
                         <span>{language === 'hi' ? 'पुनः OTP भेजें' : 'Resend OTP'}</span>
                       </button>
                     )}
-                    <span className="text-[10.5px] text-slate-400">Demo: 123456</span>
+                    <span className="text-[10.5px] text-slate-400">🔒 256-Bit SSL</span>
                   </div>
 
                   <button
@@ -568,7 +526,7 @@ export const LoginPage: React.FC = () => {
                   </button>
                 </div>
                 <p className="text-[10.5px] text-slate-400 font-medium text-center mt-1.5">
-                  {language === 'hi' ? 'डेमो पिन: 7860' : 'Demo PIN: 7860'}
+                  {language === 'hi' ? '🔒 अधिकृत व्यवस्थापक सुरक्षा पिन' : '🔒 Authorized Security PIN Only'}
                 </p>
               </div>
 
