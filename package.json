@@ -5,6 +5,7 @@
   "description": "Shree Ghanchi Samaj - Family, Directory, Matrimonial & AI Community App",
   "scripts": {
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "start": "tsx server/index.ts",
     "client:dev": "vite client --port 3007 --host",
     "server:dev": "tsx watch server/index.ts",
     "build": "vite build client && tsc --project server/tsconfig.json",
