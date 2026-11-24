@@ -19,6 +19,7 @@ export interface MemberFormData {
   occupation: string;
   phone: string;
   email?: string;
+  aadhaar?: string;
   status?: 'verified' | 'pending';
   role?: string;
 }
@@ -55,6 +56,7 @@ export const MemberProfileModal: React.FC<MemberProfileModalProps> = ({
   const [occupation, setOccupation] = useState(initialData?.occupation || '');
   const [phone, setPhone] = useState(initialData?.phone || '');
   const [email, setEmail] = useState(initialData?.email || '');
+  const [aadhaar, setAadhaar] = useState(initialData?.aadhaar || '');
 
   useEffect(() => {
     if (isOpen) {
@@ -69,6 +71,7 @@ export const MemberProfileModal: React.FC<MemberProfileModalProps> = ({
       setOccupation(initialData?.occupation || '');
       setPhone(initialData?.phone || '');
       setEmail(initialData?.email || '');
+      setAadhaar(initialData?.aadhaar || '');
     }
   }, [isOpen, initialData, language]);
 
@@ -80,8 +83,8 @@ export const MemberProfileModal: React.FC<MemberProfileModalProps> = ({
 
     onSave({
       id: initialData?.id || 'm_' + Date.now(),
-      name, guardianName, gotra, motherGotra, village, district, state: stateName, city, occupation, phone, email,
-      status: initialData?.status || 'verified',
+      name, guardianName, gotra, motherGotra, village, district, state: stateName, city, occupation, phone, email, aadhaar,
+      status: initialData?.status || 'pending',
       role: initialData?.role || (language === 'hi' ? 'सदस्य' : 'Member')
     });
     onClose();
@@ -194,6 +197,21 @@ export const MemberProfileModal: React.FC<MemberProfileModalProps> = ({
               <label className="ios-field-label">{language === 'hi' ? 'ईमेल (Email)' : 'Email'}</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="member@gmail.com" className="ios-field-input" />
             </div>
+          </div>
+
+          <div className="ios-field-group">
+            <label className="ios-field-label text-slate-700 flex items-center justify-between">
+              <span>{language === 'hi' ? 'आधार कार्ड नंबर (KYC सत्यापन हेतु)' : 'Aadhaar Card Number (For KYC)'}</span>
+              <span className="text-[10px] text-slate-400 font-normal">{language === 'hi' ? 'सुरक्षित एवं मास्क' : 'Encrypted & Masked'}</span>
+            </label>
+            <input
+              type="text"
+              maxLength={12}
+              value={aadhaar}
+              onChange={(e) => setAadhaar(e.target.value.replace(/\D/g, ''))}
+              placeholder={language === 'hi' ? '12-अंकों का आधार नंबर दर्ज करें (वैकल्पिक)' : '12-digit Aadhaar Number (Optional)'}
+              className="ios-field-input font-mono"
+            />
           </div>
 
           <button type="submit" className="ios-btn-primary w-full py-3.5 rounded-xl text-xs font-extrabold shadow-md hover:scale-[1.01] transition-all flex items-center justify-center gap-2 mt-4">

@@ -281,16 +281,30 @@ export const ProfileKYC: React.FC = () => {
           )}
         </div>
         
-        <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70 flex items-center justify-between">
+        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/70 flex items-center justify-between flex-wrap gap-2">
           <div>
             <p className="text-[10px] font-semibold text-slate-500">{t('maskedAadhaar')}</p>
-            <p className="text-xs font-mono font-black text-slate-900">
-              {kycState === 'verified' && 'XXXX - XXXX - 1042'}
-              {kycState === 'pending' && 'XXXX - XXXX - **** (समीक्षाधीन)'}
-              {kycState === 'incomplete' && (language === 'hi' ? 'विवरण अधूरा है (फ़ॉर्म भरें)' : 'Incomplete (Fill Profile Form)')}
+            <p className="text-xs font-mono font-black text-slate-900 mt-0.5">
+              {kycState === 'verified' && (memberData.aadhaar ? `XXXX - XXXX - ${memberData.aadhaar.slice(-4)}` : 'XXXX - XXXX - 1042')}
+              {kycState === 'pending' && (memberData.aadhaar ? `XXXX - XXXX - ${memberData.aadhaar.slice(-4)} (समीक्षाधीन)` : 'XXXX - XXXX - **** (समीक्षाधीन)')}
+              {kycState === 'incomplete' && (
+                <span className="text-red-600 font-bold text-xs flex items-center gap-1 font-sans">
+                  ⚠️ {language === 'hi' ? 'कोई आधार कार्ड लिंक नहीं है (अपूर्ण)' : 'No Aadhaar Linked (Incomplete)'}
+                </span>
+              )}
             </p>
           </div>
-          <span className="text-[10px] text-slate-500 font-medium">100% Privacy Encrypted</span>
+          {kycState === 'incomplete' ? (
+            <button
+              onClick={() => setIsEditModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] shadow-sm flex items-center gap-1 transition-all"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              <span>{language === 'hi' ? 'आधार KYC जोड़ें' : 'Add Aadhaar KYC'}</span>
+            </button>
+          ) : (
+            <span className="text-[10px] text-slate-500 font-medium">100% Privacy Encrypted</span>
+          )}
         </div>
       </div>
 
