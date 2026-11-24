@@ -1,6 +1,6 @@
 // [GSA-PRO-F-PG] - Member Profile, KYC & Information Feed Component
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Lock, CheckCircle2, Globe, Edit3, User, MapPin, Briefcase, Phone, Award, PlusCircle, LogOut } from 'lucide-react';
+import { ShieldCheck, Lock, CheckCircle2, Clock, AlertCircle, Globe, Edit3, User, MapPin, Briefcase, Phone, Award, PlusCircle, LogOut } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
@@ -39,6 +39,10 @@ export const ProfileKYC: React.FC = () => {
   });
 
   const isProfileEmpty = !memberData.name || !memberData.guardianName || !memberData.village || !memberData.gotra;
+
+  const kycState: 'incomplete' | 'pending' | 'verified' = isProfileEmpty
+    ? 'incomplete'
+    : (memberData.status === 'verified' ? 'verified' : 'pending');
 
   const handleSaveMemberData = async (updated: MemberFormData) => {
     if (JSON.stringify(updated) === JSON.stringify(memberData)) {
@@ -124,9 +128,21 @@ export const ProfileKYC: React.FC = () => {
                 <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
                   {memberData.name || (language === 'hi' ? 'सदस्य का नाम दर्ज करें' : 'Enter Member Name')}
                 </h2>
-                <span className="inline-flex items-center gap-1 ios-badge-verified text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t('kycStatusVerified')}
-                </span>
+                {kycState === 'verified' && (
+                  <span className="inline-flex items-center gap-1 ios-badge-verified text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {t('kycStatusVerified')}
+                  </span>
+                )}
+                {kycState === 'pending' && (
+                  <span className="inline-flex items-center gap-1 ios-badge-pending text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                    <Clock className="w-3 h-3 text-amber-600" /> {t('kycStatusPending')}
+                  </span>
+                )}
+                {kycState === 'incomplete' && (
+                  <span className="inline-flex items-center gap-1 ios-badge-incomplete text-[10px] font-extrabold px-2.5 py-0.5 rounded-full">
+                    <AlertCircle className="w-3 h-3 text-red-600" /> {t('kycStatusIncomplete')}
+                  </span>
+                )}
               </div>
               <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                 {memberData.guardianName ? `पिता: ${memberData.guardianName}` : (language === 'hi' ? 'पिता का नाम फ़ीड करें' : 'Feed Father Name')} | {t('memberId')}: {user?.memberId || 'GHS-1042'}
@@ -248,15 +264,31 @@ export const ProfileKYC: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-amber-600" />
             {t('aadhaarKycStatus')}
           </div>
-          <span className="ios-badge-verified text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t('verifiedBadge')}
-          </span>
+          {kycState === 'verified' && (
+            <span className="ios-badge-verified text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t('aadhaarStatusVerified')}
+            </span>
+          )}
+          {kycState === 'pending' && (
+            <span className="ios-badge-pending text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-amber-600" /> {t('aadhaarStatusPending')}
+            </span>
+          )}
+          {kycState === 'incomplete' && (
+            <span className="ios-badge-incomplete text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-red-600" /> {t('aadhaarStatusNotSubmitted')}
+            </span>
+          )}
         </div>
         
         <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/70 flex items-center justify-between">
           <div>
             <p className="text-[10px] font-semibold text-slate-500">{t('maskedAadhaar')}</p>
-            <p className="text-xs font-mono font-black text-slate-900">XXXX - XXXX - 1042</p>
+            <p className="text-xs font-mono font-black text-slate-900">
+              {kycState === 'verified' && 'XXXX - XXXX - 1042'}
+              {kycState === 'pending' && 'XXXX - XXXX - **** (समीक्षाधीन)'}
+              {kycState === 'incomplete' && (language === 'hi' ? 'विवरण अधूरा है (फ़ॉर्म भरें)' : 'Incomplete (Fill Profile Form)')}
+            </p>
           </div>
           <span className="text-[10px] text-slate-500 font-medium">100% Privacy Encrypted</span>
         </div>
