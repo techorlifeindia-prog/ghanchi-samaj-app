@@ -103,8 +103,8 @@ export const LoginPage: React.FC = () => {
       localStorage.setItem('gsa_active_tab', 'home');
       window.location.hash = 'home';
       loginUser({
-        id: 'usr_' + Date.now(),
-        name: email.split('@')[0].toUpperCase(),
+        id: '',
+        name: '',
         email: email,
         role: 'member',
         gotra: '',
@@ -144,11 +144,11 @@ export const LoginPage: React.FC = () => {
       localStorage.setItem('gsa_active_tab', 'home');
       window.location.hash = 'home';
       loginUser({
-        id: 'usr_' + Date.now(),
-        name: 'समाज बंधु (Member)',
-        mobile: mobile || '9829012345',
+        id: '',
+        name: '',
+        mobile: mobile,
         role: 'member',
-        gotra: 'राठौड़ (Rathore)',
+        gotra: '',
         memberId: 'GHS-' + Math.floor(1000 + Math.random() * 9000)
       });
       showToast(language === 'hi' ? '🎉 WhatsApp OTP सत्यापित! लॉगिन सफल।' : '🎉 WhatsApp OTP verified! Login successful.', 'success');

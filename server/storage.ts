@@ -219,6 +219,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateAdminMember(id: string, data: any): Promise<any> {
     try {
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      if (!isUUID) {
+        return await this.createAdminMember(data);
+      }
+
       const updateData: any = {};
       if (data.name) updateData.fullName = data.name;
       if (data.guardianName) {
@@ -255,16 +260,51 @@ export class DatabaseStorage implements IStorage {
 
   async createAdminMember(data: any): Promise<any> {
     try {
-      // Create user first
-      const [newUser] = await db.insert(users).values({
-        phoneNumber: data.phone || `0000-${Math.floor(Math.random()*10000)}`,
-        role: 'member',
-        kycStatus: data.status || 'pending',
-      }).returning();
+      const phone = data.phone?.trim() || `0000-${Date.now().toString().slice(-6)}`;
+      
+      // Check if user already exists with this phone
+      let userRecord: any;
+      const [existingUser] = await db.select().from(users).where(eq(users.phoneNumber, phone));
+      if (existingUser) {
+        userRecord = existingUser;
+      } else {
+        const [newUser] = await db.insert(users).values({
+          phoneNumber: phone,
+          role: 'member',
+          kycStatus: data.status || 'pending',
+        }).returning();
+        userRecord = newUser;
+      }
+
+      // Check if profile exists for this user
+      const [existingProfile] = await db.select().from(memberProfiles).where(eq(memberProfiles.userId, userRecord.id));
+      if (existingProfile) {
+        const [updatedProfile] = await db.update(memberProfiles).set({
+          fullName: data.name,
+          fatherName: data.guardianName ? data.guardianName.replace(/^(s\/o|d\/o|w\/o|c\/o)\s*/i, '').trim() : '',
+          paternalGotra: data.gotra || 'Borana',
+          nativeVillage: data.village || '',
+          nativeDistrict: data.district || '',
+          currentState: data.state || 'Rajasthan',
+          currentCity: data.city || '',
+        }).where(eq(memberProfiles.id, existingProfile.id)).returning();
+
+        return {
+          id: updatedProfile.id,
+          name: updatedProfile.fullName,
+          guardianName: data.guardianName || 'N/A',
+          gotra: updatedProfile.paternalGotra,
+          village: updatedProfile.nativeVillage,
+          city: updatedProfile.currentCity,
+          phone: userRecord.phoneNumber,
+          status: userRecord.kycStatus,
+          role: 'Member'
+        };
+      }
 
       // Create member profile
       const [newProfile] = await db.insert(memberProfiles).values({
-        userId: newUser.id,
+        userId: userRecord.id,
         fullName: data.name,
         fatherName: data.guardianName ? data.guardianName.replace(/^(s\/o|d\/o|w\/o|c\/o)\s*/i, '').trim() : '',
         gender: data.name.includes('Smt.') || data.name.includes('Miss') ? 'F' : 'M',
@@ -282,8 +322,8 @@ export class DatabaseStorage implements IStorage {
         gotra: newProfile.paternalGotra,
         village: newProfile.nativeVillage,
         city: newProfile.currentCity,
-        phone: newUser.phoneNumber,
-        status: newUser.kycStatus,
+        phone: userRecord.phoneNumber,
+        status: userRecord.kycStatus,
         role: 'Member'
       };
     } catch (err: any) {
@@ -291,7 +331,7 @@ export class DatabaseStorage implements IStorage {
       if (err.code === '23505') {
         throw new Error("This mobile number is already registered.");
       }
-      throw new Error("Failed to create member in database");
+      throw new Error(err.message || "Failed to create member in database");
     }
   }
 

@@ -20,12 +20,17 @@ export const ProfileKYC: React.FC = () => {
     const saved = localStorage.getItem('gsa_member_profile');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed.name && user?.email && parsed.name.toLowerCase() === user.email.split('@')[0].toLowerCase()) {
+          parsed.name = '';
+        }
+        return parsed;
       } catch (e) {}
     }
+    const initialName = user?.name && user.name.toLowerCase() !== user?.email?.split('@')[0]?.toLowerCase() ? user.name : '';
     return {
       id: user?.id,
-      name: user?.name || '',
+      name: initialName,
       guardianName: '',
       gotra: user?.gotra || '',
       motherGotra: '',
@@ -34,7 +39,9 @@ export const ProfileKYC: React.FC = () => {
       state: language === 'hi' ? 'राजस्थान' : 'Rajasthan',
       city: '',
       occupation: '',
-      phone: user?.mobile || ''
+      phone: user?.mobile || '',
+      email: user?.email || '',
+      status: 'pending'
     };
   });
 
@@ -45,15 +52,11 @@ export const ProfileKYC: React.FC = () => {
     : (memberData.status === 'verified' ? 'verified' : 'pending');
 
   const handleSaveMemberData = async (updated: MemberFormData) => {
-    if (JSON.stringify(updated) === JSON.stringify(memberData)) {
-      setIsEditModalOpen(false);
-      return;
-    }
-    
     try {
       const targetId = updated.id || user?.id;
-      const url = targetId ? `/api/admin/members/${targetId}` : '/api/admin/members';
-      const method = targetId ? 'PUT' : 'POST';
+      const isUUID = targetId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+      const url = isUUID ? `/api/admin/members/${targetId}` : '/api/admin/members';
+      const method = isUUID ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
@@ -67,11 +70,18 @@ export const ProfileKYC: React.FC = () => {
       
       const data = await response.json();
       if (data.success) {
-        setMemberData(updated);
-        // As per rule, we do NOT use localStorage for core data anymore.
+        const savedMember = data.data || updated;
+        const newMemberData: MemberFormData = {
+          ...updated,
+          id: savedMember.id || updated.id,
+          status: savedMember.status || 'pending'
+        };
+        setMemberData(newMemberData);
+        localStorage.removeItem('gsa_member_profile');
         if (user) {
           loginUser({
             ...user,
+            id: savedMember.id || user.id,
             name: updated.name || user.name,
             gotra: updated.gotra || user.gotra,
             mobile: updated.phone || user.mobile

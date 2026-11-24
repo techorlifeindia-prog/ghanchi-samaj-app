@@ -202,6 +202,10 @@ class DatabaseStorage {
     }
     async updateAdminMember(id, data) {
         try {
+            const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+            if (!isUUID) {
+                return await this.createAdminMember(data);
+            }
             const updateData = {};
             if (data.name)
                 updateData.fullName = data.name;
@@ -241,15 +245,48 @@ class DatabaseStorage {
     }
     async createAdminMember(data) {
         try {
-            // Create user first
-            const [newUser] = await db_1.db.insert(schema_1.users).values({
-                phoneNumber: data.phone || `0000-${Math.floor(Math.random() * 10000)}`,
-                role: 'member',
-                kycStatus: data.status || 'pending',
-            }).returning();
+            const phone = data.phone?.trim() || `0000-${Date.now().toString().slice(-6)}`;
+            // Check if user already exists with this phone
+            let userRecord;
+            const [existingUser] = await db_1.db.select().from(schema_1.users).where((0, drizzle_orm_1.eq)(schema_1.users.phoneNumber, phone));
+            if (existingUser) {
+                userRecord = existingUser;
+            }
+            else {
+                const [newUser] = await db_1.db.insert(schema_1.users).values({
+                    phoneNumber: phone,
+                    role: 'member',
+                    kycStatus: data.status || 'pending',
+                }).returning();
+                userRecord = newUser;
+            }
+            // Check if profile exists for this user
+            const [existingProfile] = await db_1.db.select().from(schema_1.memberProfiles).where((0, drizzle_orm_1.eq)(schema_1.memberProfiles.userId, userRecord.id));
+            if (existingProfile) {
+                const [updatedProfile] = await db_1.db.update(schema_1.memberProfiles).set({
+                    fullName: data.name,
+                    fatherName: data.guardianName ? data.guardianName.replace(/^(s\/o|d\/o|w\/o|c\/o)\s*/i, '').trim() : '',
+                    paternalGotra: data.gotra || 'Borana',
+                    nativeVillage: data.village || '',
+                    nativeDistrict: data.district || '',
+                    currentState: data.state || 'Rajasthan',
+                    currentCity: data.city || '',
+                }).where((0, drizzle_orm_1.eq)(schema_1.memberProfiles.id, existingProfile.id)).returning();
+                return {
+                    id: updatedProfile.id,
+                    name: updatedProfile.fullName,
+                    guardianName: data.guardianName || 'N/A',
+                    gotra: updatedProfile.paternalGotra,
+                    village: updatedProfile.nativeVillage,
+                    city: updatedProfile.currentCity,
+                    phone: userRecord.phoneNumber,
+                    status: userRecord.kycStatus,
+                    role: 'Member'
+                };
+            }
             // Create member profile
             const [newProfile] = await db_1.db.insert(schema_1.memberProfiles).values({
-                userId: newUser.id,
+                userId: userRecord.id,
                 fullName: data.name,
                 fatherName: data.guardianName ? data.guardianName.replace(/^(s\/o|d\/o|w\/o|c\/o)\s*/i, '').trim() : '',
                 gender: data.name.includes('Smt.') || data.name.includes('Miss') ? 'F' : 'M',
@@ -266,8 +303,8 @@ class DatabaseStorage {
                 gotra: newProfile.paternalGotra,
                 village: newProfile.nativeVillage,
                 city: newProfile.currentCity,
-                phone: newUser.phoneNumber,
-                status: newUser.kycStatus,
+                phone: userRecord.phoneNumber,
+                status: userRecord.kycStatus,
                 role: 'Member'
             };
         }
@@ -276,7 +313,7 @@ class DatabaseStorage {
             if (err.code === '23505') {
                 throw new Error("This mobile number is already registered.");
             }
-            throw new Error("Failed to create member in database");
+            throw new Error(err.message || "Failed to create member in database");
         }
     }
     async getPendingKYC() {
